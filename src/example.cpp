@@ -22,132 +22,148 @@ THE SOFTWARE.
 
 */
 
+#ifdef CXXOPTS_WIDE
+#define STR(x) L##x
+#else
+#define STR(x) x
+#endif
+
 #include <iostream>
 
 #include "cxxopts.hpp"
 
+#ifdef CXXOPTS_WIDE
+#define dcout std::wcout
+#else
+#define dcout dcout
+#endif
+
 cxxopts::ParseResult
+#ifdef CXXOPTS_WIDE
+parse(int argc, wchar_t* argv[])
+#else
 parse(int argc, char* argv[])
+#endif
 {
   try
   {
-    cxxopts::Options options(argv[0], " - example command line options");
+    cxxopts::Options options(argv[0], STR(" - example command line options"));
     options
-      .positional_help("[optional args]")
+      .positional_help(STR("[optional args]"))
       .show_positional_help();
 
     bool apple = false;
 
-    options
+	options
       .allow_unrecognised_options()
       .add_options()
-      ("a,apple", "an apple", cxxopts::value<bool>(apple))
-      ("b,bob", "Bob")
-      ("char", "A character", cxxopts::value<char>())
-      ("t,true", "True", cxxopts::value<bool>()->default_value("true"))
-      ("f, file", "File", cxxopts::value<std::vector<std::string>>(), "FILE")
-      ("i,input", "Input", cxxopts::value<std::string>())
-      ("o,output", "Output file", cxxopts::value<std::string>()
-          ->default_value("a.out")->implicit_value("b.def"), "BIN")
-      ("positional",
-        "Positional arguments: these are the arguments that are entered "
-        "without an option", cxxopts::value<std::vector<std::string>>())
-      ("long-description",
-        "thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace")
-      ("help", "Print help")
-      ("int", "An integer", cxxopts::value<int>(), "N")
-      ("float", "A floating point number", cxxopts::value<float>())
-      ("vector", "A list of doubles", cxxopts::value<std::vector<double>>())
-      ("option_that_is_too_long_for_the_help", "A very long option")
+      (STR("a,apple"), STR("an apple"), cxxopts::value<bool>(apple))
+      (STR("b,bob"), STR("Bob"))
+      (STR("char"), STR("A character"), cxxopts::value<cxxopts::Char>())
+      (STR("t,true"), STR("True"), cxxopts::value<bool>()->default_value(STR("true")))
+      (STR("f, file"), STR("File"), cxxopts::value<std::vector<cxxopts::CxxString>>(), STR("FILE"))
+      (STR("i,input"), STR("Input"), cxxopts::value<cxxopts::CxxString>())
+      (STR("o,output"), STR("Output file"), cxxopts::value<cxxopts::CxxString>()
+          ->default_value(STR("a.out"))->implicit_value(STR("b.def")), STR("BIN"))
+      (STR("positional"),
+        STR("Positional arguments: these are the arguments that are entered ")
+        STR("without an option"), cxxopts::value<std::vector<cxxopts::CxxString>>())
+      (STR("long-description"),
+        STR("thisisareallylongwordthattakesupthewholelineandcannotbebrokenataspace"))
+      (STR("help"), STR("Print help"))
+      (STR("int"), STR("An integer"), cxxopts::value<int>(), STR("N"))
+      (STR("float"), STR("A floating point number"), cxxopts::value<float>())
+      (STR("vector"), STR("A list of doubles"), cxxopts::value<std::vector<double>>())
+      (STR("option_that_is_too_long_for_the_help"), STR("A very long option"))
     #ifdef CXXOPTS_USE_UNICODE
       ("unicode", u8"A help option with non-ascii: à. Here the size of the"
         " string should be correct")
     #endif
     ;
 
-    options.add_options("Group")
-      ("c,compile", "compile")
-      ("d,drop", "drop", cxxopts::value<std::vector<std::string>>());
+    options.add_options(STR("Group"))
+      (STR("c,compile"), STR("compile"))
+      (STR("d,drop"), STR("drop"), cxxopts::value<std::vector<cxxopts::CxxString>>());
 
-    options.parse_positional({"input", "output", "positional"});
+    options.parse_positional({STR("input"), STR("output"), STR("positional")});
 
     auto result = options.parse(argc, argv);
 
-    if (result.count("help"))
+    if (result.count(STR("help")))
     {
-      std::cout << options.help({"", "Group"}) << std::endl;
+      dcout << options.help({STR(""), STR("Group")}) << std::endl;
       exit(0);
     }
 
     if (apple)
     {
-      std::cout << "Saw option ‘a’ " << result.count("a") << " times " <<
+      dcout << STR("Saw option ‘a’") << result.count(STR("a")) << STR(" times ") <<
         std::endl;
     }
 
-    if (result.count("b"))
+    if (result.count(STR("b")))
     {
-      std::cout << "Saw option ‘b’" << std::endl;
+      dcout << STR("Saw option ‘b’") << std::endl;
     }
 
-    if (result.count("char"))
+    if (result.count(STR("char")))
     {
-      std::cout << "Saw a character ‘" << result["char"].as<char>() << "’" << std::endl;
+      dcout << STR("Saw a character ‘") << result[STR("char")].as<cxxopts::Char>() << STR("’") << std::endl;
     }
 
-    if (result.count("f"))
+    if (result.count(STR("f")))
     {
-      auto& ff = result["f"].as<std::vector<std::string>>();
-      std::cout << "Files" << std::endl;
+      auto& ff = result[STR("f")].as<std::vector<cxxopts::CxxString>>();
+      dcout << STR("Files") << std::endl;
       for (const auto& f : ff)
       {
-        std::cout << f << std::endl;
+        dcout << f << std::endl;
       }
     }
 
-    if (result.count("input"))
+    if (result.count(STR("input")))
     {
-      std::cout << "Input = " << result["input"].as<std::string>()
+      dcout << STR("Input = ") << result[STR("input")].as<cxxopts::CxxString>()
         << std::endl;
     }
 
-    if (result.count("output"))
+    if (result.count(STR("output")))
     {
-      std::cout << "Output = " << result["output"].as<std::string>()
+      dcout << STR("Output = ") << result[STR("output")].as<cxxopts::CxxString>()
         << std::endl;
     }
 
-    if (result.count("positional"))
+    if (result.count(STR("positional")))
     {
-      std::cout << "Positional = {";
-      auto& v = result["positional"].as<std::vector<std::string>>();
+      dcout << STR("Positional = {");
+      auto& v = result[STR("positional")].as<std::vector<cxxopts::CxxString>>();
       for (const auto& s : v) {
-        std::cout << s << ", ";
+        dcout << s << STR(", ");
       }
-      std::cout << "}" << std::endl;
+      dcout << STR("}") << std::endl;
     }
 
-    if (result.count("int"))
+    if (result.count(STR("int")))
     {
-      std::cout << "int = " << result["int"].as<int>() << std::endl;
+      dcout << STR("int = ") << result[STR("int")].as<int>() << std::endl;
     }
 
-    if (result.count("float"))
+    if (result.count(STR("float")))
     {
-      std::cout << "float = " << result["float"].as<float>() << std::endl;
+      dcout << STR("float = ") << result[STR("float")].as<float>() << std::endl;
     }
 
-    if (result.count("vector"))
+    if (result.count(STR("vector")))
     {
-      std::cout << "vector = ";
-      const auto values = result["vector"].as<std::vector<double>>();
+      dcout << STR("vector = ");
+      const auto values = result[STR("vector")].as<std::vector<double>>();
       for (const auto& v : values) {
-        std::cout << v << ", ";
+        dcout << v << STR(", ");
       }
-      std::cout << std::endl;
+      dcout << std::endl;
     }
 
-    std::cout << "Arguments remain = " << argc << std::endl;
+    dcout << STR("Arguments remain = ") << argc << std::endl;
 
     return result;
 
@@ -158,11 +174,15 @@ parse(int argc, char* argv[])
   }
 }
 
+#ifdef CXXOPTS_WIDE
+int wmain(int argc, wchar_t* argv[])
+#else
 int main(int argc, char* argv[])
+#endif
 {
   auto result = parse(argc, argv);
   auto arguments = result.arguments();
-  std::cout << "Saw " << arguments.size() << " arguments" << std::endl;
+  dcout << STR("Saw ") << arguments.size() << STR(" arguments") << std::endl;
 
   return 0;
 }

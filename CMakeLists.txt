@@ -19,6 +19,8 @@
 # THE SOFTWARE.
 cmake_minimum_required(VERSION 3.1)
 
+add_definitions(/DCXXOPTS_WIDE)
+
 # parse the current version from the cxxopts header
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/cxxopts.hpp" cxxopts_version_defines
      REGEX "#define CXXOPTS__VERSION_(MAJOR|MINOR|PATCH)")
@@ -105,4 +107,4 @@ if(CXXOPTS_ENABLE_INSTALL)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(test)
+#add_subdirectory(test)
